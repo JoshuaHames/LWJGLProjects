@@ -48,6 +48,8 @@ public class DummyGame implements IGameLogic {
 
     GameItem[] gameItems;
 
+    Vector3f ambiantLight;
+
     boolean hasSecondPassed;
     boolean checkFPS = false;
     boolean doCheck = true;
@@ -114,32 +116,26 @@ public class DummyGame implements IGameLogic {
         sceneLight = new SceneLight();
 
         // Ambient Light
-        sceneLight.setAmbientLight(new Vector3f(0.3f, 0.3f, 0.3f));
+        ambiantLight = (new Vector3f(0f, 0f, 0f));
+        sceneLight.setAmbientLight(ambiantLight);
+
+
+        //Directional Light
+        Vector3f lightPosition = new Vector3f(-1, 1, -1);
+        float lightIntensity = 0.00f;
+        sceneLight.setDirectionalLight(new DirectionalLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity));
+
+        // Create HUD
 
         // Point Light
-        Vector3f lightPosition = new Vector3f(0, 0, 1);
-        float lightIntensity = 1.0f;
-        PointLight pointLight = new PointLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
+        lightPosition = new Vector3f(0, 0, 1);
+        lightIntensity = 5f;
+        PointLight pointLight = new PointLight(new Vector3f(0, 0, 1), lightPosition, lightIntensity);
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
         pointLight.setAttenuation(att);
         sceneLight.setPointLightList(new PointLight[]{pointLight});
 
-        // Spot Light
-        lightPosition = new Vector3f(0, 0.0f, 10f);
-        pointLight = new PointLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
-        att = new PointLight.Attenuation(0.0f, 0.0f, 0.02f);
-        pointLight.setAttenuation(att);
-        Vector3f coneDir = new Vector3f(0, 0, -1);
-        float cutoff = (float) Math.cos(Math.toRadians(140));
-        SpotLight spotLight = new SpotLight(pointLight, coneDir, cutoff);
-        sceneLight.setSpotLightList(new SpotLight[]{spotLight, new SpotLight(spotLight)});
-
-        lightPosition = new Vector3f(-1, 0, 0);
-        sceneLight.setDirectionalLight(new DirectionalLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity));
-
-        // Create HUD
-
-        hud = new Hud("FPS: ");
+        hud = new Hud(numBlocks + " Blocks");
 
     }
 
@@ -147,7 +143,11 @@ public class DummyGame implements IGameLogic {
     public void input(Window window, MouseInput mouseInput) {
         cameraInc.set(0, 0, 0);
         if (window.isKeyPressed(GLFW_KEY_W)) {
-            cameraInc.z = -1;
+            if(window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)){
+                cameraInc.z = -1 * 5;
+            } else {
+                cameraInc.z = -1;
+            }
         } else if (window.isKeyPressed(GLFW_KEY_S)) {
             cameraInc.z = 1;
         }
@@ -160,21 +160,26 @@ public class DummyGame implements IGameLogic {
             cameraInc.y = -1;
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
             cameraInc.y = 1;
+        } else if (window.isKeyPressed(GLFW_KEY_O)) {
+            sceneLight.setAmbientLight(new Vector3f(sceneLight.getAmbientLight().x + 0.008f,sceneLight.getAmbientLight().y + 0.001f,sceneLight.getAmbientLight().z + 0.001f));
+        } else if (window.isKeyPressed(GLFW_KEY_P)) {
+            sceneLight.setAmbientLight(new Vector3f(sceneLight.getAmbientLight().x - 0.008f,sceneLight.getAmbientLight().y - 0.001f,sceneLight.getAmbientLight().z - 0.001f));
+        } else if (window.isKeyPressed(GLFW_KEY_L)) {
+            PointLight[] pointLightList = sceneLight.getPointLightList();
+            pointLightList[0].setColor(new Vector3f(pointLightList[0].getColor().x+0.004f, pointLightList[0].getColor().y, pointLightList[0].getColor().z));
+        } else if (window.isKeyPressed(GLFW_KEY_K)) {
+            PointLight[] pointLightList = sceneLight.getPointLightList();
+            pointLightList[0].setColor(new Vector3f(pointLightList[0].getColor().x, pointLightList[0].getColor().y+0.004f, pointLightList[0].getColor().z));
         }
-        SpotLight[] spotLightList = sceneLight.getSpotLightList();
-        float lightPos = spotLightList[0].getPointLight().getPosition().z;
-        if (window.isKeyPressed(GLFW_KEY_N)) {
-            spotLightList[0].getPointLight().getPosition().z = lightPos + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_M)) {
-            spotLightList[0].getPointLight().getPosition().z = lightPos - 0.1f;
-        }
+
     }
 
     @Override
 
     public void update(float interval, MouseInput mouseInput) {
 
-        FPSsetup();
+        //FPSsetup();
+
 
         // Update camera position
         camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
@@ -188,42 +193,11 @@ public class DummyGame implements IGameLogic {
             hud.rotateCompass(camera.getRotation().y);
         }
 
-        // Update spot light direction
-        spotAngle += spotInc * 0.05f;
-        if (spotAngle > 2) {
-            spotInc = -1;
-        } else if (spotAngle < -2) {
-            spotInc = 1;
-        }
-        double spotAngleRad = Math.toRadians(spotAngle);
-        SpotLight[] spotLightList = sceneLight.getSpotLightList();
-        Vector3f coneDir = spotLightList[0].getConeDirection();
-        coneDir.y = (float) Math.sin(spotAngleRad);
+        PointLight[] pointLightList = sceneLight.getPointLightList();
 
-        // Update directional light direction, intensity and colour
-        DirectionalLight directionalLight = sceneLight.getDirectionalLight();
-        lightAngle += 1.1f;
-        if (lightAngle > 90) {
-            directionalLight.setIntensity(0);
-            if (lightAngle >= 360) {
-                lightAngle = -90;
-            }
-        } else if (lightAngle <= -80 || lightAngle >= 80) {
-            float factor = 1 - (float) (Math.abs(lightAngle) - 80) / 10.0f;
-            directionalLight.setIntensity(factor);
-            directionalLight.getColor().y = Math.max(factor, 0.9f);
-            directionalLight.getColor().z = Math.max(factor, 0.5f);
-        } else {
-            directionalLight.setIntensity(1);
-            directionalLight.getColor().x = 1;
-            directionalLight.getColor().y = 1;
-            directionalLight.getColor().z = 1;
-        }
-        double angRad = Math.toRadians(lightAngle);
-        directionalLight.getDirection().x = (float) Math.sin(angRad);
-        directionalLight.getDirection().y = (float) Math.cos(angRad);
+        pointLightList[0].setPosition(camera.getPosition());
 
-        FPSCalc();
+        //FPSCalc();
 
     }
 
