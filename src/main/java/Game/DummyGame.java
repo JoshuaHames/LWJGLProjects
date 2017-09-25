@@ -18,6 +18,7 @@ import Engine.graph.*;
 import Engine.SceneLight;
 import java.lang.Math;
 import Engine.Timer;
+import Engine.graph.ImprovedNoise;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -43,9 +44,17 @@ public class DummyGame implements IGameLogic {
 
     private float spotInc = 1;
 
-    private Timer timer;
+    private ImprovedNoise perlin;
 
     GameItem[] gameItems;
+
+    boolean hasSecondPassed;
+    boolean checkFPS = false;
+    boolean doCheck = true;
+    boolean doTimeStamp = true;
+    double startTime;
+    double newTime;
+    int FPScount = 0;
 
     int Width;
     int Length;
@@ -59,6 +68,7 @@ public class DummyGame implements IGameLogic {
         camera = new Camera();
         cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         lightAngle = -90;
+        perlin = new ImprovedNoise();
 
         Width = 50;
         Length = 50;
@@ -70,7 +80,7 @@ public class DummyGame implements IGameLogic {
 
         gameItems = new GameItem[numBlocks];
 
-        timer = new Timer();
+
     }
 
     @Override
@@ -93,10 +103,8 @@ public class DummyGame implements IGameLogic {
                 for (int Z = Length; Z > 0; Z--){
                     gameItem = new GameItem(mesh);
                     gameItem.setScale(0.5f);
-                    gameItem.setPosition(0+X, 0+Y, 0+Z);
+                    gameItem.setPosition(X, Y, Z);
                     gameItems[Step] = gameItem;
-
-                    System.out.println("X: " + X + " Y: " + Y + " Z: " + Z);
 
                     Step--;
                 }
@@ -159,12 +167,14 @@ public class DummyGame implements IGameLogic {
             spotLightList[0].getPointLight().getPosition().z = lightPos + 0.1f;
         } else if (window.isKeyPressed(GLFW_KEY_M)) {
             spotLightList[0].getPointLight().getPosition().z = lightPos - 0.1f;
-            hud.setStatusText(Double.toString(timer.ReturnFPS()));
         }
     }
 
     @Override
+
     public void update(float interval, MouseInput mouseInput) {
+
+        FPSsetup();
 
         // Update camera position
         camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
@@ -213,7 +223,7 @@ public class DummyGame implements IGameLogic {
         directionalLight.getDirection().x = (float) Math.sin(angRad);
         directionalLight.getDirection().y = (float) Math.cos(angRad);
 
-
+        FPSCalc();
 
     }
 
@@ -230,6 +240,34 @@ public class DummyGame implements IGameLogic {
             gameItem.getMesh().cleanUp();
         }
         hud.cleanup();
+    }
+
+    private void FPSsetup() {
+        if (checkFPS == true && doTimeStamp == true){
+            startTime = System.nanoTime() / 1000_000_000.0;
+            doTimeStamp = false;
+            hasSecondPassed = false;
+        }
+    }
+
+    private void FPSCalc() {
+
+        if (checkFPS == true && hasSecondPassed == false) {
+            newTime = System.nanoTime() / 1000_000_000.0;
+
+            if ((newTime - startTime) >= 1){
+                hasSecondPassed = true;
+                doTimeStamp = true;
+                hud.setStatusText("FPS: " + FPScount);
+                FPScount = 0;
+            } else {
+                FPScount += 1;
+            }
+        }
+
+        if (checkFPS == false && doCheck == true) {
+            checkFPS = true;
+        }
     }
 
 }

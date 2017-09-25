@@ -30,7 +30,7 @@ public class Timer {
     public int ReturnFPS(){
         double startTime = System.nanoTime() / 1000_000_000.0;
         boolean hasSecondPassed = false;
-        double newTime;
+        double newTime = 0;
         int FPScount = 0;
 
         while(!hasSecondPassed){
