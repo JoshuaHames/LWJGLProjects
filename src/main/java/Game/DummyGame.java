@@ -46,6 +46,8 @@ public class DummyGame implements IGameLogic {
 
     private ImprovedNoise perlin;
 
+    private SimplexNoise simplex;
+
     GameItem[] gameItems;
 
     Vector3f ambiantLight;
@@ -71,6 +73,7 @@ public class DummyGame implements IGameLogic {
         cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         lightAngle = -90;
         perlin = new ImprovedNoise();
+        simplex = new SimplexNoise();
 
         Width = 50;
         Length = 50;
@@ -100,9 +103,11 @@ public class DummyGame implements IGameLogic {
         mesh.setMaterial(material);
         GameItem gameItem;
 
+
         for (int Y = Height; Y > 0; Y--){
             for (int X = Width; X > 0; X--){
                 for (int Z = Length; Z > 0; Z--){
+
                     gameItem = new GameItem(mesh);
                     gameItem.setScale(0.5f);
                     gameItem.setPosition(X, Y, Z);
@@ -116,21 +121,21 @@ public class DummyGame implements IGameLogic {
         sceneLight = new SceneLight();
 
         // Ambient Light
-        ambiantLight = (new Vector3f(0f, 0f, 0f));
+        ambiantLight = (new Vector3f(0.2f, 0.2f, 0.2f));
         sceneLight.setAmbientLight(ambiantLight);
 
 
         //Directional Light
         Vector3f lightPosition = new Vector3f(-1, 1, -1);
-        float lightIntensity = 0.00f;
+        float lightIntensity = 1.00f;
         sceneLight.setDirectionalLight(new DirectionalLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity));
 
         // Create HUD
 
         // Point Light
         lightPosition = new Vector3f(0, 0, 1);
-        lightIntensity = 5f;
-        PointLight pointLight = new PointLight(new Vector3f(0, 0, 1), lightPosition, lightIntensity);
+        lightIntensity = 1f;
+        PointLight pointLight = new PointLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity);
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
         pointLight.setAttenuation(att);
         sceneLight.setPointLightList(new PointLight[]{pointLight});
@@ -160,18 +165,7 @@ public class DummyGame implements IGameLogic {
             cameraInc.y = -1;
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
             cameraInc.y = 1;
-        } else if (window.isKeyPressed(GLFW_KEY_O)) {
-            sceneLight.setAmbientLight(new Vector3f(sceneLight.getAmbientLight().x + 0.008f,sceneLight.getAmbientLight().y + 0.001f,sceneLight.getAmbientLight().z + 0.001f));
-        } else if (window.isKeyPressed(GLFW_KEY_P)) {
-            sceneLight.setAmbientLight(new Vector3f(sceneLight.getAmbientLight().x - 0.008f,sceneLight.getAmbientLight().y - 0.001f,sceneLight.getAmbientLight().z - 0.001f));
-        } else if (window.isKeyPressed(GLFW_KEY_L)) {
-            PointLight[] pointLightList = sceneLight.getPointLightList();
-            pointLightList[0].setColor(new Vector3f(pointLightList[0].getColor().x+0.004f, pointLightList[0].getColor().y, pointLightList[0].getColor().z));
-        } else if (window.isKeyPressed(GLFW_KEY_K)) {
-            PointLight[] pointLightList = sceneLight.getPointLightList();
-            pointLightList[0].setColor(new Vector3f(pointLightList[0].getColor().x, pointLightList[0].getColor().y+0.004f, pointLightList[0].getColor().z));
         }
-
     }
 
     @Override
