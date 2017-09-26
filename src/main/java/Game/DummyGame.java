@@ -92,6 +92,7 @@ public class DummyGame implements IGameLogic {
     public void init(Window window) throws Exception {
         renderer.init(window);
 
+
         float reflectance = 1f;
         //Mesh mesh = OBJLoader.loadMesh("/models/bunny.obj");
         //Material material = new Material(new Vector3f(0.2f, 0.5f, 0.5f), reflectance);
