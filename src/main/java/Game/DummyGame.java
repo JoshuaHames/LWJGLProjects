@@ -249,9 +249,9 @@ public class DummyGame implements IGameLogic {
                     gameItem.setScale(0.5f);
 
                     if (floor == true) {
-                        gameItem.setPosition(Y, (float)Math.floor(simplex.noise(X * offset,Y * offset) * weight), X);
+                        gameItem.setPosition(Y, Z+(float)Math.floor(simplex.noise(X * offset,Y * offset) * weight), X);
                     } else {
-                        gameItem.setPosition(Y, (simplex.noise(X * offset,Y * offset) * weight), X);
+                        gameItem.setPosition(Y, Z+(simplex.noise(X * offset,Y * offset) * weight), X);
                     }
                     gameItems[Step] = gameItem;
 
