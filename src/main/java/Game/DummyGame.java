@@ -19,6 +19,7 @@ import Engine.SceneLight;
 import java.lang.Math;
 import Engine.Timer;
 import Engine.graph.ImprovedNoise;
+import static org.lwjgl.opengl.GL11.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -52,13 +53,12 @@ public class DummyGame implements IGameLogic {
 
     Vector3f ambiantLight;
 
-    boolean hasSecondPassed;
-    boolean checkFPS = false;
-    boolean doCheck = true;
-    boolean doTimeStamp = true;
-    double startTime;
-    double newTime;
-    int FPScount = 0;
+    Vector4f color;
+
+    float weight;
+    float offset;
+
+    int moveSpeed = 1;
 
     int Width;
     int Length;
@@ -67,16 +67,25 @@ public class DummyGame implements IGameLogic {
     int numBlocks;
     int Step;
 
+    Mesh mesh;
+    Texture texture;
+    Material material;
+    GameItem gameItem;
+
+    boolean floor = true;
+
+    Mesh holder;
+
     public DummyGame() {
         renderer = new Renderer();
         camera = new Camera();
-        cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
+        cameraInc = new Vector3f(10.0f, 10.0f, 10.0f);
         lightAngle = -90;
         perlin = new ImprovedNoise();
         simplex = new SimplexNoise();
 
-        Width = 50;
-        Length = 50;
+        Width = 100;
+        Length = 100;
         Height = 1;
 
         numBlocks = Width*Length*Height;
@@ -97,38 +106,27 @@ public class DummyGame implements IGameLogic {
         //Mesh mesh = OBJLoader.loadMesh("/models/bunny.obj");
         //Material material = new Material(new Vector3f(0.2f, 0.5f, 0.5f), reflectance);
 
-        Mesh mesh = OBJLoader.loadMesh("/models/cube.obj");
-        Texture texture = new Texture("/textures/grassblock.png");
-        Material material = new Material(texture, reflectance);
-
+        mesh = OBJLoader.loadMesh("/models/cube.obj");
+        texture = new Texture("/textures/grassblock.png");
+        color = new Vector4f(1f,1f,1f,1f);
+        material = new Material(texture);
         mesh.setMaterial(material);
-        GameItem gameItem;
 
+        offset = 0;
+        weight = 0;
 
-        for (int Y = Height; Y > 0; Y--){
-            for (int X = Width; X > 0; X--){
-                for (int Z = Length; Z > 0; Z--){
-
-                    gameItem = new GameItem(mesh);
-                    gameItem.setScale(0.5f);
-                    gameItem.setPosition(X, Y, Z);
-                    gameItems[Step] = gameItem;
-
-                    Step--;
-                }
-            }
-        }
+        genBlocks(gameItem);
 
         sceneLight = new SceneLight();
 
         // Ambient Light
-        ambiantLight = (new Vector3f(0.2f, 0.2f, 0.2f));
+        ambiantLight = (new Vector3f(0.5f, 0.5f, 0.5f));
         sceneLight.setAmbientLight(ambiantLight);
 
 
         //Directional Light
         Vector3f lightPosition = new Vector3f(-1, 1, -1);
-        float lightIntensity = 1.00f;
+        float lightIntensity = 0.70f;
         sceneLight.setDirectionalLight(new DirectionalLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity));
 
         // Create HUD
@@ -141,40 +139,72 @@ public class DummyGame implements IGameLogic {
         pointLight.setAttenuation(att);
         sceneLight.setPointLightList(new PointLight[]{pointLight});
 
-        hud = new Hud(numBlocks + " Blocks");
+        hud = new Hud(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
 
     }
 
     @Override
     public void input(Window window, MouseInput mouseInput) {
         cameraInc.set(0, 0, 0);
+
+        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+            moveSpeed = 5;
+
+        } else {
+            moveSpeed = 1;
+        }
+
         if (window.isKeyPressed(GLFW_KEY_W)) {
-            if(window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)){
-                cameraInc.z = -1 * 5;
-            } else {
-                cameraInc.z = -1;
-            }
+                cameraInc.z = -moveSpeed;
+
         } else if (window.isKeyPressed(GLFW_KEY_S)) {
-            cameraInc.z = 1;
+            cameraInc.z = moveSpeed;
         }
         if (window.isKeyPressed(GLFW_KEY_A)) {
-            cameraInc.x = -1;
+            cameraInc.x = -moveSpeed;
         } else if (window.isKeyPressed(GLFW_KEY_D)) {
-            cameraInc.x = 1;
+            cameraInc.x = moveSpeed;
         }
         if (window.isKeyPressed(GLFW_KEY_Z)) {
-            cameraInc.y = -1;
+            cameraInc.y = -moveSpeed;
+
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
-            cameraInc.y = 1;
+            cameraInc.y = moveSpeed;
+        } else if (window.isKeyPressed(GLFW_KEY_O)) {
+            offset += 0.0001;
+            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
+            genBlocks(gameItem);
+        } else if (window.isKeyPressed(GLFW_KEY_P)) {
+            weight += 0.03;
+            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
+            genBlocks(gameItem);
+        } else if (window.isKeyPressed(GLFW_KEY_L)) {
+            offset -= 0.0001;
+            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
+            genBlocks(gameItem);
+        } else if (window.isKeyPressed(GLFW_KEY_SEMICOLON)) {
+            weight -= 0.03;
+            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
+            genBlocks(gameItem);
+        } else if (window.isKeyPressed(GLFW_KEY_F)) {
+            if (floor == false) {
+                floor = true;
+            } else {
+                floor = false;
+            }
+
+            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
+        } else if (window.isKeyPressed(GLFW_KEY_R)) {
+            floor = true;
+            weight = 0;
+            offset = 0;
+            genBlocks(gameItem);
         }
     }
 
     @Override
 
     public void update(float interval, MouseInput mouseInput) {
-
-        //FPSsetup();
-
 
         // Update camera position
         camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
@@ -191,8 +221,6 @@ public class DummyGame implements IGameLogic {
         PointLight[] pointLightList = sceneLight.getPointLightList();
 
         pointLightList[0].setPosition(camera.getPosition());
-
-        //FPSCalc();
 
     }
 
@@ -211,32 +239,25 @@ public class DummyGame implements IGameLogic {
         hud.cleanup();
     }
 
-    private void FPSsetup() {
-        if (checkFPS == true && doTimeStamp == true){
-            startTime = System.nanoTime() / 1000_000_000.0;
-            doTimeStamp = false;
-            hasSecondPassed = false;
-        }
-    }
+    public void genBlocks(GameItem gameItem){
 
-    private void FPSCalc() {
+        Step = numBlocks - 1;
+        for (int Z = 0; Z < Height; Z++){
+            for (int X =0; X <  Width; X++){
+                for (int Y = 0; Y < Length; Y++){
+                    gameItem = new GameItem(mesh);
+                    gameItem.setScale(0.5f);
 
-        if (checkFPS == true && hasSecondPassed == false) {
-            newTime = System.nanoTime() / 1000_000_000.0;
+                    if (floor == true) {
+                        gameItem.setPosition(Y, (float)Math.floor(simplex.noise(X * offset,Y * offset) * weight), X);
+                    } else {
+                        gameItem.setPosition(Y, (simplex.noise(X * offset,Y * offset) * weight), X);
+                    }
+                    gameItems[Step] = gameItem;
 
-            if ((newTime - startTime) >= 1){
-                hasSecondPassed = true;
-                doTimeStamp = true;
-                hud.setStatusText("FPS: " + FPScount);
-                FPScount = 0;
-            } else {
-                FPScount += 1;
+                    Step--;
+                }
             }
         }
-
-        if (checkFPS == false && doCheck == true) {
-            checkFPS = true;
-        }
     }
-
 }
