@@ -74,8 +74,6 @@ public class DummyGame implements IGameLogic {
 
     boolean floor = true;
 
-    Mesh holder;
-
     public DummyGame() {
         renderer = new Renderer();
         camera = new Camera();
@@ -120,7 +118,7 @@ public class DummyGame implements IGameLogic {
         sceneLight = new SceneLight();
 
         // Ambient Light
-        ambiantLight = (new Vector3f(0.5f, 0.5f, 0.5f));
+        ambiantLight = (new Vector3f(0.05f, 0.05f, 0.05f));
         sceneLight.setAmbientLight(ambiantLight);
 
 
