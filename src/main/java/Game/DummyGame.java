@@ -102,16 +102,14 @@ public class DummyGame implements IGameLogic {
 
         scene = new Scene();
 
-        float reflectance = 1f;
-
         mesh = OBJLoader.loadMesh("/models/cube.obj");
         texture = new Texture("/textures/grassblock.png");
         color = new Vector4f(1f,1f,1f,1f);
         material = new Material(texture);
         mesh.setMaterial(material);
 
-        offset = 0;
-        weight = 0;
+        offset = 0.05123f;
+        weight = 3;
 
         genBlocks(gameItem);
 
@@ -128,7 +126,7 @@ public class DummyGame implements IGameLogic {
         setupLights();
 
         //Skybox setup
-        SkyBox skyBox = new SkyBox("/models/skybox.obj", "/textures/skybox.png");
+        SkyBox skyBox = new SkyBox("/models/skybox.obj", "/textures/SpaceBox.png");
         skyBox.setScale(skyBoxScale);
         scene.setSkyBox(skyBox);
 
@@ -148,7 +146,7 @@ public class DummyGame implements IGameLogic {
         }
 
         if (window.isKeyPressed(GLFW_KEY_W)) {
-                cameraInc.z = -moveSpeed;
+            cameraInc.z = -moveSpeed;
 
         } else if (window.isKeyPressed(GLFW_KEY_S)) {
             cameraInc.z = moveSpeed;
@@ -163,40 +161,10 @@ public class DummyGame implements IGameLogic {
 
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
             cameraInc.y = moveSpeed;
-        } else if (window.isKeyPressed(GLFW_KEY_O)) {
-            offset += 0.0001;
-            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
-            genBlocks(gameItem);
-        } else if (window.isKeyPressed(GLFW_KEY_P)) {
-            weight += 0.03;
-            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
-            genBlocks(gameItem);
-        } else if (window.isKeyPressed(GLFW_KEY_L)) {
-            offset -= 0.0001;
-            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
-            genBlocks(gameItem);
-        } else if (window.isKeyPressed(GLFW_KEY_SEMICOLON)) {
-            weight -= 0.03;
-            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
-            genBlocks(gameItem);
-        } else if (window.isKeyPressed(GLFW_KEY_F)) {
-            if (floor == false) {
-                floor = true;
-            } else {
-                floor = false;
-            }
-
-            hud.setStatusText(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
-        } else if (window.isKeyPressed(GLFW_KEY_R)) {
-            floor = true;
-            weight = 0;
-            offset = 0;
-            genBlocks(gameItem);
         }
     }
 
     @Override
-
     public void update(float interval, MouseInput mouseInput) {
 
         // Update camera position

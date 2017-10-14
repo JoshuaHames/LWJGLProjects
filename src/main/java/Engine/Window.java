@@ -87,6 +87,7 @@ public class Window {
         // Make the OpenGL context current
         glfwMakeContextCurrent(windowHandle);
 
+
         if (isvSync()) {
             // Enable v-sync
             glfwSwapInterval(1);
@@ -97,10 +98,12 @@ public class Window {
 
         GL.createCapabilities();
 
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+
         // Set the clear color
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glEnable(GL_DEPTH_TEST);
-        //aglEnable(GL_CULL_FACE);
+
         //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
         // Support for transparencies
