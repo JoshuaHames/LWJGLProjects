@@ -4,20 +4,17 @@ package Game;
  * Created by IceEye on 2017-03-02.
  */
 
-import Engine.IGameLogic;
-import Engine.Window;
+import Engine.*;
 import Engine.graph.Mesh;
 import Engine.graph.OBJLoader;
-import Engine.GameItem;
 import org.joml.Vector3f;
 import Engine.graph.Texture;
-import Engine.MouseInput;
 import Engine.graph.Camera;
 import org.joml.*;
 import Engine.graph.*;
-import Engine.SceneLight;
+
 import java.lang.Math;
-import Engine.Timer;
+
 import Engine.graph.ImprovedNoise;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -48,6 +45,10 @@ public class DummyGame implements IGameLogic {
     private ImprovedNoise perlin;
 
     private SimplexNoise simplex;
+
+    private SkyBox skyBox;
+
+    private Scene scene;
 
     GameItem[] gameItems;
 
@@ -99,10 +100,9 @@ public class DummyGame implements IGameLogic {
     public void init(Window window) throws Exception {
         renderer.init(window);
 
+        scene = new Scene();
 
         float reflectance = 1f;
-        //Mesh mesh = OBJLoader.loadMesh("/models/bunny.obj");
-        //Material material = new Material(new Vector3f(0.2f, 0.5f, 0.5f), reflectance);
 
         mesh = OBJLoader.loadMesh("/models/cube.obj");
         texture = new Texture("/textures/grassblock.png");
@@ -115,27 +115,22 @@ public class DummyGame implements IGameLogic {
 
         genBlocks(gameItem);
 
-        sceneLight = new SceneLight();
+        scene.setGameItems(gameItems);
 
-        // Ambient Light
-        ambiantLight = (new Vector3f(0.05f, 0.05f, 0.05f));
-        sceneLight.setAmbientLight(ambiantLight);
+        float skyBoxScale = 400.0f;
+        float extension = 2.0f;
 
+        float startx = extension * (-skyBoxScale+0.5f);
+        float startz = extension * (skyBoxScale - 0.5f);
+        float starty = - 1.0f;
+        float inc = 0.5f * 2;
 
-        //Directional Light
-        Vector3f lightPosition = new Vector3f(-1, 1, -1);
-        float lightIntensity = 0.70f;
-        sceneLight.setDirectionalLight(new DirectionalLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity));
+        setupLights();
 
-        // Create HUD
-
-        // Point Light
-        lightPosition = new Vector3f(0, 0, 1);
-        lightIntensity = 1f;
-        PointLight pointLight = new PointLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity);
-        PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
-        pointLight.setAttenuation(att);
-        sceneLight.setPointLightList(new PointLight[]{pointLight});
+        //Skybox setup
+        SkyBox skyBox = new SkyBox("/models/skybox.obj", "/textures/skybox.png");
+        skyBox.setScale(skyBoxScale);
+        scene.setSkyBox(skyBox);
 
         hud = new Hud(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
 
@@ -225,7 +220,7 @@ public class DummyGame implements IGameLogic {
     @Override
     public void render(Window window) {
         hud.updateSize(window);
-        renderer.render(window, camera, gameItems, sceneLight, hud);
+        renderer.render(window, camera, scene, hud);
     }
 
     @Override
@@ -257,5 +252,28 @@ public class DummyGame implements IGameLogic {
                 }
             }
         }
+    }
+
+    public void setupLights(){
+        sceneLight = new SceneLight();
+
+        // Ambient Light
+        ambiantLight = (new Vector3f(0.5f, 0.5f, 0.5f));
+        sceneLight.setAmbientLight(ambiantLight);
+        scene.setSceneLight(sceneLight);
+
+
+        //Directional Light
+        Vector3f lightPosition = new Vector3f(-1, 1, -1);
+        float lightIntensity = 0.70f;
+        sceneLight.setDirectionalLight(new DirectionalLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity));
+
+        // Point Light
+        lightPosition = new Vector3f(0, 0, 1);
+        lightIntensity = 1f;
+        PointLight pointLight = new PointLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity);
+        PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
+        pointLight.setAttenuation(att);
+        sceneLight.setPointLightList(new PointLight[]{pointLight});
     }
 }

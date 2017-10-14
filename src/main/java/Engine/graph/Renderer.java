@@ -13,8 +13,8 @@ import Engine.Window;
 import Engine.GameItem;
 import Engine.SceneLight;
 import Engine.IHud;
-import Game.Hud;
-import Engine.graph.Transformation;
+import Engine.Scene;
+import Engine.SkyBox;
 
 public class Renderer {
 
@@ -37,6 +37,8 @@ public class Renderer {
 
     private ShaderProgram hudShaderProgram;
 
+    private ShaderProgram sb_shader;
+
     private final float specularPower;
 
     public Renderer() {
@@ -47,6 +49,30 @@ public class Renderer {
     public void init(Window window) throws Exception {
         setupSceneShader();
         setupHudShader();
+        setUpSkyBoxShader();
+    }
+
+    public void clear() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    public void render(Window window, Camera camera, Scene scene, IHud hud) {
+
+        clear();
+
+        if ( window.isResized() ) {
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            window.setResized(false);
+        }
+
+
+        renderScene(window, camera, scene);
+
+        renderHud(window, hud);
+
+        renderSkyBox(window, camera, scene);
+
+
     }
 
     private void setupSceneShader() throws Exception {
@@ -76,33 +102,25 @@ public class Renderer {
         hudShaderProgram.createFragmentShader(Utils.loadResource("/shaders/hud_fragment.fs"));
         hudShaderProgram.link();
 
-        // Create uniforms for Ortographic-model projection matrix and base colour
+        // Create uniforms for Ortographic-model projection matrix and base color
         hudShaderProgram.createUniform("projModelMatrix");
         hudShaderProgram.createUniform("colour");
         hudShaderProgram.createUniform("hasTexture");
     }
 
-    public void clear() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    private void setUpSkyBoxShader() throws Exception {
+        sb_shader = new ShaderProgram();
+        sb_shader.createVertexShader(Utils.loadResource("/shaders/sb_vertex.vs"));
+        sb_shader.createFragmentShader(Utils.loadResource("/shaders/sb_fragment.fs"));
+        sb_shader.link();
+
+        sb_shader.createUniform("projectionMatrix");
+        sb_shader.createUniform("modelViewMatrix");
+        sb_shader.createUniform("texture_sampler");
+        sb_shader.createUniform("ambientLight");
     }
 
-    public void render(Window window, Camera camera, GameItem[] gameItems,
-                       SceneLight sceneLight, IHud hud) {
-
-        clear();
-
-        if ( window.isResized() ) {
-            glViewport(0, 0, window.getWidth(), window.getHeight());
-            window.setResized(false);
-        }
-
-        renderScene(window, camera, gameItems, sceneLight);
-
-        renderHud(window, hud);
-    }
-
-    public void renderScene(Window window, Camera camera, GameItem[] gameItems,
-                            SceneLight sceneLight) {
+    public void renderScene(Window window, Camera camera, Scene scene) {
 
         sceneShaderProgram.bind();
 
@@ -113,10 +131,12 @@ public class Renderer {
         // Update view Matrix
         Matrix4f viewMatrix = transformation.getViewMatrix(camera);
 
+        SceneLight sceneLight = scene.getSceneLight();
         renderLights(viewMatrix, sceneLight);
 
         sceneShaderProgram.setUniform("texture_sampler", 0);
-        // Render each gameItem
+
+        GameItem[] gameItems = scene.getGameItems();
         for (GameItem gameItem : gameItems) {
             Mesh mesh = gameItem.getMesh();
             // Set model view matrix for this item
@@ -176,6 +196,7 @@ public class Renderer {
         dir.mul(viewMatrix);
         currDirLight.setDirection(new Vector3f(dir.x, dir.y, dir.z));
         sceneShaderProgram.setUniform("directionalLight", currDirLight);
+
     }
 
     private void renderHud(Window window, IHud hud) {
@@ -195,6 +216,29 @@ public class Renderer {
         }
 
         hudShaderProgram.unbind();
+    }
+
+    private void renderSkyBox(Window window, Camera camera, Scene scene){
+
+        sb_shader.bind();
+
+        sb_shader.setUniform("texture_sampler", 0);
+
+        //Update projection matrix
+        Matrix4f projectionMatrix = transformation.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);
+        sb_shader.setUniform("projectionMatrix", projectionMatrix);
+        SkyBox skyBox = scene.getSkyBox();
+        Matrix4f viewMatrix = transformation.getViewMatrix(camera);
+        viewMatrix.m30(0);
+        viewMatrix.m31(0);
+        viewMatrix.m32(0);
+        Matrix4f modelViewMatrix = transformation.getModelViewMatrix(skyBox, viewMatrix);
+        sb_shader.setUniform("modelViewMatrix", modelViewMatrix);
+        sb_shader.setUniform("ambientLight", scene.getSceneLight().getAmbientLight());
+
+        scene.getSkyBox().getMesh().render();
+
+        sb_shader.unbind();
     }
 
     public void cleanup() {
