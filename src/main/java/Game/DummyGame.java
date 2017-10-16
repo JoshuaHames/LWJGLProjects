@@ -63,17 +63,18 @@ public class DummyGame implements IGameLogic {
 
     int Width;
     int Length;
-    int Height;
 
     int numBlocks;
-    int Step;
 
-    Mesh mesh;
-    Texture texture;
+    Mesh grassMesh;
+    Mesh stoneMesh;
+    Texture stoneTexture;
+    Texture grassTexture;
     Material material;
-    GameItem gameItem;
+    GameItem grassBlock;
+    GameItem stoneBlock;
 
-    boolean floor = true;
+    boolean floor = false;
 
     public DummyGame() {
         renderer = new Renderer();
@@ -85,15 +86,6 @@ public class DummyGame implements IGameLogic {
 
         Width = 100;
         Length = 100;
-        Height = 1;
-
-        numBlocks = Width*Length*Height;
-
-        Step = numBlocks - 1;
-
-        gameItems = new GameItem[numBlocks];
-
-
     }
 
     @Override
@@ -102,16 +94,23 @@ public class DummyGame implements IGameLogic {
 
         scene = new Scene();
 
-        mesh = OBJLoader.loadMesh("/models/cube.obj");
-        texture = new Texture("/textures/grassblock.png");
+        //Setup Grass Block
+        grassMesh = OBJLoader.loadMesh("/models/cube.obj");
+        grassTexture = new Texture("/textures/grassblock.png");
         color = new Vector4f(1f,1f,1f,1f);
-        material = new Material(texture);
-        mesh.setMaterial(material);
+        material = new Material(grassTexture);
+        grassMesh.setMaterial(material);
 
-        offset = 0.05123f;
-        weight = 3;
+        //Setup Stone Block
+        stoneMesh = OBJLoader.loadMesh("/models/cube.obj");
+        stoneTexture = new Texture("/textures/stoneblock.png");
+        material = new Material(stoneTexture);
+        stoneMesh.setMaterial(material);
 
-        genBlocks(gameItem);
+        offset = 0.03f;
+        weight = 2;
+
+        genBlocks(grassBlock, stoneBlock);
 
         scene.setGameItems(gameItems);
 
@@ -200,24 +199,70 @@ public class DummyGame implements IGameLogic {
         hud.cleanup();
     }
 
-    public void genBlocks(GameItem gameItem){
-
+    public void genBlocks(GameItem Grass, GameItem Stone){
+        float blockHeight;
+        float worldBottom = -5;
+        int Step = 0;
         Step = numBlocks - 1;
-        for (int Z = 0; Z < Height; Z++){
-            for (int X =0; X <  Width; X++){
-                for (int Y = 0; Y < Length; Y++){
-                    gameItem = new GameItem(mesh);
-                    gameItem.setScale(0.5f);
 
-                    if (floor == true) {
-                        gameItem.setPosition(Y, Z+(float)Math.floor(simplex.noise(X * offset,Y * offset) * weight), X);
-                    } else {
-                        gameItem.setPosition(Y, Z+(simplex.noise(X * offset,Y * offset) * weight), X);
-                    }
-                    gameItems[Step] = gameItem;
+        //Calculate the number of blocks
+        for (int X =0; X <  Width; X++){
+            for (int Y = 0; Y < Length; Y++){
 
+                if (floor == true) {
+                    blockHeight = (float)Math.floor(simplex.noise(X * offset,Y * offset) * weight);
+                    Step++;
+                } else {
+                    blockHeight = (simplex.noise(X * offset,Y * offset) * weight);
+                    Step++;
+                }
+
+                while (blockHeight > worldBottom){
+                    Step++;
+                    blockHeight--;
+                }
+
+            }
+        }
+
+
+        System.out.println(Step);
+        gameItems = new GameItem[Step+1];
+
+        for (int X =0; X <  Width; X++){
+            for (int Y = 0; Y < Length; Y++){
+                grassBlock = new GameItem(grassMesh);
+                grassBlock.setScale(0.5f);
+
+                if (floor == true) {
+                    blockHeight = (float)Math.floor(simplex.noise(X * offset,Y * offset) * weight);
+                    grassBlock.setPosition(Y, 0+blockHeight, X);
+
+                } else {
+                    blockHeight = (simplex.noise(X * offset,Y * offset) * weight);
+                    grassBlock.setPosition(Y, 0+blockHeight, X);
+
+                }
+
+                gameItems[Step] = grassBlock;
+
+                System.out.println("Grass at step " + Step);
+                Step--;
+
+
+                while (blockHeight > worldBottom){
+                    stoneBlock = new GameItem(stoneMesh);
+                    stoneBlock.setScale(0.5f);
+                    blockHeight--;
+
+                    stoneBlock.setPosition(Y, blockHeight, X);
+
+                    gameItems[Step] = stoneBlock;
+
+                    System.out.println("Stone at step " + Step);
                     Step--;
                 }
+
             }
         }
     }
@@ -244,4 +289,5 @@ public class DummyGame implements IGameLogic {
         pointLight.setAttenuation(att);
         sceneLight.setPointLightList(new PointLight[]{pointLight});
     }
+
 }
