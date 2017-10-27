@@ -74,6 +74,8 @@ public class DummyGame implements IGameLogic {
         camera = new Camera();
         cameraInc = new Vector3f(10.0f, 10.0f, 10.0f);
         lightAngle = -90;
+
+        gameItems = new GameItem[1];
     }
 
     @Override
@@ -91,7 +93,17 @@ public class DummyGame implements IGameLogic {
         Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrainLow.png", textInc);
         scene.setGameItems(terrain.getGameItems());
 
-        //scene.setGameItems(gameItems);
+        GameItem vase = new GameItem();
+        Mesh vaseMesh = OBJLoader.loadMesh("/models/greek_vase.obj");
+        Texture tex = new Texture("/textures/VASE_TEX.png");
+        vaseMesh.setMaterial(new Material(tex));
+        vase.setScale(0.01f);
+        vase.setPosition(3,3,3);
+        vase.setMesh(vaseMesh);
+
+        gameItems[0] = vase;
+
+        scene.setGameItems(gameItems);
 
         float skyBoxScale = 400.0f;
         float extension = 2.0f;
@@ -140,6 +152,7 @@ public class DummyGame implements IGameLogic {
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
             cameraInc.y = moveSpeed;
         }
+
     }
 
     @Override
@@ -165,6 +178,8 @@ public class DummyGame implements IGameLogic {
 
         hud.setStatusText(("X: " + Math.floor(camera.getPosition().x) + " Y: " + Math.floor(camera.getPosition().y) + " Z: " + Math.floor(camera.getPosition().z)));
 
+        Vector3f curPos= camera.getPosition();
+        gameItems[0].setPosition(curPos.x, curPos.y-2, curPos.z-2);
     }
 
     @Override
