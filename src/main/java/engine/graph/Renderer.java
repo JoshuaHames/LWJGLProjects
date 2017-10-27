@@ -1,20 +1,23 @@
-package Engine.graph;
+package engine.graph;
 
 /**
  * Created by IceEye on 2017-03-02.
  */
 
+import engine.graph.lights.DirectionalLight;
+import engine.graph.lights.PointLight;
+import engine.graph.lights.SpotLight;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.opengl.GL11.*;
-import Engine.Utils;
-import Engine.Window;
-import Engine.GameItem;
-import Engine.SceneLight;
-import Engine.IHud;
-import Engine.Scene;
-import Engine.SkyBox;
+import engine.Utils;
+import engine.Window;
+import engine.items.GameItem;
+import engine.SceneLight;
+import engine.IHud;
+import engine.Scene;
+import engine.items.SkyBox;
 import java.util.List;
 import java.util.Map;
 

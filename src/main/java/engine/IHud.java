@@ -1,4 +1,6 @@
-package Engine;
+package engine;
+
+import engine.items.GameItem;
 
 /**
  * Created by IceEye on 2017-09-16.

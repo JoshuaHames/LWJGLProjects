@@ -1,4 +1,4 @@
-package Engine.graph;
+package engine.graph;
 
 /**
  * Created by IceEye on 2017-06-01.

@@ -1,4 +1,4 @@
-package Engine.graph;
+package engine.graph;
 
 /**
  * Created by IceEye on 2017-03-02.
@@ -9,6 +9,10 @@ import static org.lwjgl.opengl.GL20.*;
 import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
+
+import engine.graph.lights.DirectionalLight;
+import engine.graph.lights.PointLight;
+import engine.graph.lights.SpotLight;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.joml.Vector3f;

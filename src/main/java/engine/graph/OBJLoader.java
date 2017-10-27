@@ -1,4 +1,4 @@
-package Engine.graph;
+package engine.graph;
 
 /**
  * Created by IceEye on 2017-05-30.
@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import Engine.Utils;
 
 public class OBJLoader {
 

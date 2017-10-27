@@ -1,4 +1,4 @@
-package Engine.graph;
+package engine.graph;
 
 /**
  * Created by IceEye on 2017-03-02.
@@ -15,7 +15,7 @@ import static org.lwjgl.opengl.GL30.*;
 import java.util.function.Consumer;
 import org.lwjgl.system.MemoryUtil;
 
-import Engine.GameItem;
+import engine.items.GameItem;
 
 public class Mesh {
 

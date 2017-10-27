@@ -1,8 +1,6 @@
-package Engine.graph;
+package engine.graph;
 
 import org.joml.Vector3f;
-
-import java.util.Vector;
 
 /**
  * Created by IceEye on 2017-05-18.

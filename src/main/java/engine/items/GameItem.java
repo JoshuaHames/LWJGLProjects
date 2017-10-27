@@ -1,10 +1,10 @@
-package Engine;
+package engine.items;
 
 /**
  * Created by IceEye on 2017-05-03.
  */
 import org.joml.Vector3f;
-import Engine.graph.Mesh;
+import engine.graph.Mesh;
 
 
 public class GameItem {

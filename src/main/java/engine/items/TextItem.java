@@ -1,10 +1,12 @@
-package Engine;
-import java.nio.charset.Charset;
+package engine.items;
 import java.util.ArrayList;
 import java.util.List;
-import Engine.graph.FontTexture;
-import Engine.graph.Material;
-import Engine.graph.Mesh;
+
+import engine.Utils;
+import engine.graph.FontTexture;
+import engine.graph.Material;
+import engine.graph.Mesh;
+import engine.items.GameItem;
 
 /**
  * Created by IceEye on 2017-07-31.

@@ -3,8 +3,8 @@ package Game;
 /**
  * Created by IceEye on 2017-03-02.
  */
-import Engine.GameEngine;
-import Engine.IGameLogic;
+import engine.GameEngine;
+import engine.IGameLogic;
 
 public class Main {
 

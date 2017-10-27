@@ -1,17 +1,11 @@
-package Engine.graph;
+package engine.graph;
 
 /**
  * Created by IceEye on 2017-05-03.
  */
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import Engine.GameItem;
-
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import Engine.GameItem;
-
-import java.util.Vector;
+import engine.items.GameItem;
 
 public class Transformation {
 

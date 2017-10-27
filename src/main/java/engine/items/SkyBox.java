@@ -1,15 +1,16 @@
-package Engine;
+package engine.items;
 
-import Engine.graph.OBJLoader;
-import Engine.graph.Material;
-import Engine.graph.Mesh;
-import Engine.graph.Texture;
+import engine.graph.OBJLoader;
+import engine.graph.Material;
+import engine.graph.Mesh;
+import engine.graph.Texture;
+import engine.items.GameItem;
 
 /**
  * Created by IceEye on 2017-10-14.
  * Sometimes I wonder if this is a waste of time
  */
-public class SkyBox extends GameItem{
+public class SkyBox extends GameItem {
 
     public SkyBox(String objModel, String textureFile) throws Exception{
 

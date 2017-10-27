@@ -5,9 +5,12 @@ package Game;
  */
 
 import java.awt.Font;
+
+import engine.items.GameItem;
+import engine.items.TextItem;
 import org.joml.Vector4f;
-import Engine.*;
-import Engine.graph.*;
+import engine.*;
+import engine.graph.*;
 
 public class Hud implements IHud {
 

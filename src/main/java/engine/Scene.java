@@ -1,9 +1,11 @@
-package Engine;
+package engine;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import Engine.graph.Mesh;
+import engine.graph.Mesh;
+import engine.items.GameItem;
+import engine.items.SkyBox;
 
 
 /**

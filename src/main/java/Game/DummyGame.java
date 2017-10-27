@@ -4,19 +4,24 @@ package Game;
  * Created by IceEye on 2017-03-02.
  */
 
-import Engine.*;
-import Engine.graph.Mesh;
-import Engine.graph.OBJLoader;
+import engine.*;
+import engine.graph.Mesh;
+import engine.graph.OBJLoader;
+import engine.graph.lights.DirectionalLight;
+import engine.graph.lights.PointLight;
+import engine.graph.lights.SpotLight;
+import engine.items.GameItem;
+import engine.items.SkyBox;
 import org.joml.Vector3f;
-import Engine.graph.Texture;
-import Engine.graph.Camera;
+import engine.graph.Texture;
+import engine.graph.Camera;
 import org.joml.*;
-import Engine.graph.*;
+import engine.graph.*;
+import engine.items.Terrain;
 
 import java.lang.Math;
 
-import Engine.graph.ImprovedNoise;
-import static org.lwjgl.opengl.GL11.*;
+import engine.graph.ImprovedNoise;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -56,36 +61,19 @@ public class DummyGame implements IGameLogic {
 
     Vector4f color;
 
-    float weight;
-    float offset;
-
-    int moveSpeed = 1;
-
-    int Width;
-    int Length;
 
     int numBlocks;
 
-    Mesh grassMesh;
-    Mesh stoneMesh;
-    Texture stoneTexture;
-    Texture grassTexture;
-    Material material;
-    GameItem grassBlock;
-    GameItem stoneBlock;
+    int boost = 15;
+    int moveSpeed = 1;
 
-    boolean floor = false;
+    boolean floor = true;
 
     public DummyGame() {
         renderer = new Renderer();
         camera = new Camera();
         cameraInc = new Vector3f(10.0f, 10.0f, 10.0f);
         lightAngle = -90;
-        perlin = new ImprovedNoise();
-        simplex = new SimplexNoise();
-
-        Width = 100;
-        Length = 100;
     }
 
     @Override
@@ -94,25 +82,16 @@ public class DummyGame implements IGameLogic {
 
         scene = new Scene();
 
-        //Setup Grass Block
-        grassMesh = OBJLoader.loadMesh("/models/cube.obj");
-        grassTexture = new Texture("/textures/grassblock.png");
-        color = new Vector4f(1f,1f,1f,1f);
-        material = new Material(grassTexture);
-        grassMesh.setMaterial(material);
+        //Set up terrain
+        float terrainScale = 100;
+        int terrainSize = 1;
+        float minY = -0.075f;
+        float maxY = 0.075f;
+        int textInc = 40;
+        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrainLow.png", textInc);
+        scene.setGameItems(terrain.getGameItems());
 
-        //Setup Stone Block
-        stoneMesh = OBJLoader.loadMesh("/models/cube.obj");
-        stoneTexture = new Texture("/textures/stoneblock.png");
-        material = new Material(stoneTexture);
-        stoneMesh.setMaterial(material);
-
-        offset = 0.03f;
-        weight = 2;
-
-        genBlocks(grassBlock, stoneBlock);
-
-        scene.setGameItems(gameItems);
+        //scene.setGameItems(gameItems);
 
         float skyBoxScale = 400.0f;
         float extension = 2.0f;
@@ -129,7 +108,7 @@ public class DummyGame implements IGameLogic {
         skyBox.setScale(skyBoxScale);
         scene.setSkyBox(skyBox);
 
-        hud = new Hud(("Offset: " + offset + " Weight: " + weight + " Floor: " + floor));
+        hud = new Hud(("X: " + camera.getPosition().x + " Y: " + camera.getPosition().y + " Z: " + camera.getPosition().x));
 
     }
 
@@ -138,7 +117,7 @@ public class DummyGame implements IGameLogic {
         cameraInc.set(0, 0, 0);
 
         if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-            moveSpeed = 5;
+            moveSpeed = boost;
 
         } else {
             moveSpeed = 1;
@@ -179,8 +158,12 @@ public class DummyGame implements IGameLogic {
         }
 
         PointLight[] pointLightList = sceneLight.getPointLightList();
+        SpotLight[] spotList  =sceneLight.getSpotLightList();
 
         pointLightList[0].setPosition(camera.getPosition());
+        //spotList[0].setPointLight(pointLightList[0]);
+
+        hud.setStatusText(("X: " + Math.floor(camera.getPosition().x) + " Y: " + Math.floor(camera.getPosition().y) + " Z: " + Math.floor(camera.getPosition().z)));
 
     }
 
@@ -199,95 +182,39 @@ public class DummyGame implements IGameLogic {
         hud.cleanup();
     }
 
-    public void genBlocks(GameItem Grass, GameItem Stone){
-        float blockHeight;
-        float worldBottom = -5;
-        int Step = 0;
-        Step = numBlocks - 1;
-
-        //Calculate the number of blocks
-        for (int X =0; X <  Width; X++){
-            for (int Y = 0; Y < Length; Y++){
-
-                if (floor == true) {
-                    blockHeight = (float)Math.floor(simplex.noise(X * offset,Y * offset) * weight);
-                    Step++;
-                } else {
-                    blockHeight = (simplex.noise(X * offset,Y * offset) * weight);
-                    Step++;
-                }
-
-                while (blockHeight > worldBottom){
-                    Step++;
-                    blockHeight--;
-                }
-
-            }
-        }
-
-
-        System.out.println(Step);
-        gameItems = new GameItem[Step+1];
-
-        for (int X =0; X <  Width; X++){
-            for (int Y = 0; Y < Length; Y++){
-                grassBlock = new GameItem(grassMesh);
-                grassBlock.setScale(0.5f);
-
-                if (floor == true) {
-                    blockHeight = (float)Math.floor(simplex.noise(X * offset,Y * offset) * weight);
-                    grassBlock.setPosition(Y, 0+blockHeight, X);
-
-                } else {
-                    blockHeight = (simplex.noise(X * offset,Y * offset) * weight);
-                    grassBlock.setPosition(Y, 0+blockHeight, X);
-
-                }
-
-                gameItems[Step] = grassBlock;
-
-                System.out.println("Grass at step " + Step);
-                Step--;
-
-
-                while (blockHeight > worldBottom){
-                    stoneBlock = new GameItem(stoneMesh);
-                    stoneBlock.setScale(0.5f);
-                    blockHeight--;
-
-                    stoneBlock.setPosition(Y, blockHeight, X);
-
-                    gameItems[Step] = stoneBlock;
-
-                    System.out.println("Stone at step " + Step);
-                    Step--;
-                }
-
-            }
-        }
-    }
-
     public void setupLights(){
         sceneLight = new SceneLight();
 
         // Ambient Light
-        ambiantLight = (new Vector3f(0.5f, 0.5f, 0.5f));
+        ambiantLight = (new Vector3f(0.2f, 0.2f, 0.2f));
         sceneLight.setAmbientLight(ambiantLight);
         scene.setSceneLight(sceneLight);
 
 
         //Directional Light
         Vector3f lightPosition = new Vector3f(-1, 1, -1);
-        float lightIntensity = 0.70f;
+        float lightIntensity = 3.0f;
         sceneLight.setDirectionalLight(new DirectionalLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity));
 
         // Point Light
         lightPosition = new Vector3f(0, 0, 1);
-        lightIntensity = 1f;
+        lightIntensity = 0.0f;
         PointLight pointLight = new PointLight(new Vector3f(1.1f, 1, 1), lightPosition, lightIntensity);
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
         pointLight.setAttenuation(att);
         sceneLight.setPointLightList(new PointLight[]{pointLight});
+
+        // Spot Light
+        lightPosition = new Vector3f(0, 0.0f, 10f);
+        lightIntensity = 4.0f;
+        pointLight = new PointLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
+        att = new PointLight.Attenuation(0.0f, 0.0f, 0.02f);
+        pointLight.setAttenuation(att);
+        Vector3f coneDir = camera.getRotation();
+        float cutoff = (float) Math.cos(Math.toRadians(180));
+        SpotLight spotLight = new SpotLight(pointLight, coneDir, cutoff);
+        sceneLight.setSpotLightList(new SpotLight[]{spotLight});
+
     }
 
 }
