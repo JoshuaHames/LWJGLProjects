@@ -157,6 +157,7 @@ public class DummyGame implements IGameLogic {
 
     @Override
     public void update(float interval, MouseInput mouseInput) {
+        Vector3f curPos= camera.getPosition();
 
         // Update camera position
         camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
@@ -171,14 +172,11 @@ public class DummyGame implements IGameLogic {
         }
 
         PointLight[] pointLightList = sceneLight.getPointLightList();
-        SpotLight[] spotList  =sceneLight.getSpotLightList();
 
         pointLightList[0].setPosition(camera.getPosition());
-        //spotList[0].setPointLight(pointLightList[0]);
 
-        hud.setStatusText(("X: " + Math.floor(camera.getPosition().x) + " Y: " + Math.floor(camera.getPosition().y) + " Z: " + Math.floor(camera.getPosition().z)));
+        hud.setStatusText(("X: " + Math.floor(curPos.x) + " Y: " + Math.floor(curPos.y) + " Z: " + Math.floor(curPos.z)));
 
-        Vector3f curPos= camera.getPosition();
         gameItems[0].setPosition(curPos.x, curPos.y-2, curPos.z-2);
     }
 
