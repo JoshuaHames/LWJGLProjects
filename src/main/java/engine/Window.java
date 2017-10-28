@@ -8,6 +8,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.glfw.*;
 import static org.lwjgl.opengl.GL11.GL_FALSE;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL11.glClearColor;
@@ -37,7 +38,10 @@ public class Window {
         this.resized = false;
     }
 
+
     public void init() {
+        GLFWCursorPosCallback cursorPos;
+
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
         GLFWErrorCallback.createPrint(System.err).set();
@@ -109,6 +113,7 @@ public class Window {
         // Support for transparencies
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     }
 
     public long getWindowHandle() {
@@ -150,6 +155,8 @@ public class Window {
     public boolean isvSync() {
         return vSync;
     }
+
+    public long getHandle() {return windowHandle; }
 
     public void setvSync(boolean vSync) {
         this.vSync = vSync;

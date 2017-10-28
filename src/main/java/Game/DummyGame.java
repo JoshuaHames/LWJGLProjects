@@ -18,10 +18,12 @@ import engine.graph.Camera;
 import org.joml.*;
 import engine.graph.*;
 import engine.items.Terrain;
+import engine.Window;
 
 import java.lang.Math;
 
 import engine.graph.ImprovedNoise;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -59,15 +61,8 @@ public class DummyGame implements IGameLogic {
 
     Vector3f ambiantLight;
 
-    Vector4f color;
-
-
-    int numBlocks;
-
     int boost = 15;
     int moveSpeed = 1;
-
-    boolean floor = true;
 
     public DummyGame() {
         renderer = new Renderer();
@@ -76,12 +71,13 @@ public class DummyGame implements IGameLogic {
         lightAngle = -90;
 
         gameItems = new GameItem[1];
+
     }
 
     @Override
     public void init(Window window) throws Exception {
-        renderer.init(window);
 
+        renderer.init(window);
         scene = new Scene();
 
         //Set up terrain
@@ -119,6 +115,7 @@ public class DummyGame implements IGameLogic {
         SkyBox skyBox = new SkyBox("/models/skybox.obj", "/textures/SpaceBox.png");
         skyBox.setScale(skyBoxScale);
         scene.setSkyBox(skyBox);
+
 
         hud = new Hud(("X: " + camera.getPosition().x + " Y: " + camera.getPosition().y + " Z: " + camera.getPosition().x));
 
