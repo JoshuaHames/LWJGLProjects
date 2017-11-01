@@ -86,7 +86,7 @@ public class DummyGame implements IGameLogic {
         float minY = -0.075f;
         float maxY = 0.075f;
         int textInc = 40;
-        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrainLow.png", textInc);
+        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrain.png", textInc);
         scene.setGameItems(terrain.getGameItems());
 
         GameItem vase = new GameItem();
