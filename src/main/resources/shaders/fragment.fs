@@ -59,9 +59,11 @@ uniform DirectionalLight directionalLight;
 vec4 ambientC;
 vec4 diffuseC;
 vec4 speculrC;
+float oldHeight;
 
 void setupColours(Material material, vec2 textCoord)
 {
+
     if (material.hasTexture == 1)
     {
         ambientC = texture(texture_sampler, textCoord);
@@ -154,4 +156,6 @@ void main()
     }
 
     fragColor = ambientC * vec4(ambientLight, 1) + diffuseSpecularComp;
+
+
 }

@@ -24,6 +24,9 @@ public class HeightMapMesh {
 
     private final Mesh mesh;
 
+    List<Float> positions;
+    List<Integer> indices;
+
     public HeightMapMesh(float minY, float maxY, String heightMapFile, String textureFile, int textInc) throws Exception {
         this.minY = minY;
         this.maxY = maxY;
@@ -41,9 +44,9 @@ public class HeightMapMesh {
         float incx = getXLength() / (width - 1);
         float incz = getZLength() / (height - 1);
 
-        List<Float> positions = new ArrayList();
+        positions = new ArrayList();
         List<Float> textCoords = new ArrayList();
-        List<Integer> indices = new ArrayList();
+        indices = new ArrayList();
 
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
@@ -174,6 +177,14 @@ public class HeightMapMesh {
         int argb = ((0xFF & a) << 24) | ((0xFF & r) << 16)
                 | ((0xFF & g) << 8) | (0xFF & b);
         return this.minY + Math.abs(this.maxY - this.minY) * ((float) argb / (float) MAX_COLOR);
+    }
+
+    public List<Float> getPositions(){
+        return positions;
+    }
+
+    public List<Integer> getIndices(){
+        return indices;
     }
 
 }

@@ -1,11 +1,14 @@
 package engine.items;
 
 import engine.graph.HeightMapMesh;
+import org.lwjgl.opengl.GL32;
 
 /**
  * Created by IceEye on 2017-10-27.
  */
 public class Terrain {
+
+    HeightMapMesh heightMapMesh;
 
     private final GameItem[] gameItems;
 
@@ -13,7 +16,7 @@ public class Terrain {
 
         gameItems = new GameItem[blocksPerRow * blocksPerRow];
 
-        HeightMapMesh heightMapMesh = new HeightMapMesh(minY, maxY, heightMap, textureFile, textInc);
+        heightMapMesh = new HeightMapMesh(minY, maxY, heightMap, textureFile, textInc);
 
         for (int row = 0; row < blocksPerRow; row++) {
             for (int col = 0; col < blocksPerRow; col++) {
@@ -30,6 +33,10 @@ public class Terrain {
     }
     public GameItem[] getGameItems(){
         return gameItems;
+    }
+
+    public HeightMapMesh getHeightMapMesh(){
+        return heightMapMesh;
     }
 
 }

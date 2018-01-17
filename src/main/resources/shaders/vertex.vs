@@ -18,4 +18,5 @@ void main()
     outTexCoord = texCoord;
     mvVertexNormal = normalize(modelViewMatrix * vec4(vertexNormal, 0.0)).xyz;
     mvVertexPos = mvPos.xyz;
+
 }

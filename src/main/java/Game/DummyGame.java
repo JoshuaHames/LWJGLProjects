@@ -19,11 +19,11 @@ import org.joml.*;
 import engine.graph.*;
 import engine.items.Terrain;
 import engine.Window;
+import java.util.List;
 
 import java.lang.Math;
 
 import engine.graph.ImprovedNoise;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -41,19 +41,7 @@ public class DummyGame implements IGameLogic {
 
     private Hud hud;
 
-    private float lightAngle;
-
     private static final float CAMERA_POS_STEP = 0.05f;
-
-    private float spotAngle = 0;
-
-    private float spotInc = 1;
-
-    private ImprovedNoise perlin;
-
-    private SimplexNoise simplex;
-
-    private SkyBox skyBox;
 
     private Scene scene;
 
@@ -68,7 +56,6 @@ public class DummyGame implements IGameLogic {
         renderer = new Renderer();
         camera = new Camera();
         cameraInc = new Vector3f(10.0f, 10.0f, 10.0f);
-        lightAngle = -90;
 
         gameItems = new GameItem[1];
 
@@ -77,17 +64,28 @@ public class DummyGame implements IGameLogic {
     @Override
     public void init(Window window) throws Exception {
 
+        OBJMaker objMaker = new OBJMaker();
+        objMaker.createFile("OutputObject.obj"); // Name of the created object file
+
         renderer.init(window);
         scene = new Scene();
 
         //Set up terrain
         float terrainScale = 100;
         int terrainSize = 1;
-        float minY = -0.075f;
-        float maxY = 0.075f;
+        float minY = -0.08f;
+        float maxY = 0.08f;
         int textInc = 40;
-        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrain.png", textInc);
+        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrain.png", textInc); //Specifying which Heightmap and texture file to load and binding it to a Terrain type
         scene.setGameItems(terrain.getGameItems());
+
+        List<Float> tPositions = terrain.getHeightMapMesh().getPositions();
+        List<Integer> iPositions = terrain.getHeightMapMesh().getIndices();
+
+        objMaker.setVerticies(tPositions, iPositions);
+        objMaker.setIndices(iPositions);
+
+        objMaker.closeFile();
 
         GameItem vase = new GameItem();
         Mesh vaseMesh = OBJLoader.loadMesh("/models/greek_vase.obj");
