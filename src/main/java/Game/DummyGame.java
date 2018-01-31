@@ -11,6 +11,7 @@ import engine.graph.lights.DirectionalLight;
 import engine.graph.lights.PointLight;
 import engine.graph.lights.SpotLight;
 import engine.items.GameItem;
+import engine.items.NoiseTerrain;
 import engine.items.SkyBox;
 import org.joml.Vector3f;
 import engine.graph.Texture;
@@ -76,16 +77,18 @@ public class DummyGame implements IGameLogic {
         float minY = -0.08f;
         float maxY = 0.08f;
         int textInc = 40;
-        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrain.png", textInc); //Specifying which Heightmap and texture file to load and binding it to a Terrain type
+
+        //Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "/textures/rivermap.png", "/textures/terrain.png", textInc); //Specifying which Heightmap and texture file to load and binding it to a Terrain type
+        NoiseTerrain terrain = new NoiseTerrain(terrainSize, terrainScale, minY, maxY, "/textures/terrain.png", textInc);
         scene.setGameItems(terrain.getGameItems());
 
-        List<Float> tPositions = terrain.getHeightMapMesh().getPositions();
-        List<Integer> iPositions = terrain.getHeightMapMesh().getIndices();
+        List<Float> tPositions = terrain.getNoiseMapMesh().getPositions();
+        List<Integer> iPositions = terrain.getNoiseMapMesh().getIndices();
 
         objMaker.setVerticies(tPositions, iPositions);
         objMaker.setIndices(iPositions);
 
-        objMaker.closeFile();
+        //objMaker.closeFile();
 
         GameItem vase = new GameItem();
         Mesh vaseMesh = OBJLoader.loadMesh("/models/greek_vase.obj");
@@ -116,6 +119,8 @@ public class DummyGame implements IGameLogic {
 
 
         hud = new Hud(("X: " + camera.getPosition().x + " Y: " + camera.getPosition().y + " Z: " + camera.getPosition().x));
+        gameItems[0].setPosition(-1,-1,-1);
+
 
     }
 
@@ -152,7 +157,7 @@ public class DummyGame implements IGameLogic {
 
     @Override
     public void update(float interval, MouseInput mouseInput) {
-        Vector3f curPos= camera.getPosition();
+        Vector3f curPos = camera.getPosition();
 
         // Update camera position
         camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
@@ -164,6 +169,7 @@ public class DummyGame implements IGameLogic {
 
             // Update HUD compass
             hud.rotateCompass(camera.getRotation().y);
+
         }
 
         PointLight[] pointLightList = sceneLight.getPointLightList();
@@ -172,7 +178,6 @@ public class DummyGame implements IGameLogic {
 
         hud.setStatusText(("X: " + Math.floor(curPos.x) + " Y: " + Math.floor(curPos.y) + " Z: " + Math.floor(curPos.z)));
 
-        gameItems[0].setPosition(curPos.x, curPos.y-2, curPos.z-2);
     }
 
     @Override
